@@ -36,3 +36,6 @@ def get_hash(message: str):
     hashCode = hash.hexdigest()
     return hashCode
 
+
+# print(send_register_email("prohanter36@gmail.com", "sosi"))
+

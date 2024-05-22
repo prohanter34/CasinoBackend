@@ -4,9 +4,18 @@ from pydantic import BaseModel
 class User(BaseModel):
     login: str
     email: str = None
-    password: str
+    password: str = None
     cash: int = None
     verify: bool = False
+
+
+class PasswordsChange(BaseModel):
+    oldPassword: str
+    newPassword: str
+
+
+class Deposit(BaseModel):
+    deposit: int
 
 
 class VerifyRequest(BaseModel):
@@ -26,6 +35,7 @@ class GoodResponse(BaseModel):
 # 100 - verify email sends
 # 101 - verify success
 # 102 - refresh tokens, send request again
+# 103 - operation success
 
 
 class BadResponse(BaseModel):
@@ -41,4 +51,5 @@ class BadResponse(BaseModel):
 # 3 - bad email
 # 4 - uncorrected verify code
 # 5 - old refresh token
+# 66 - all bad
 

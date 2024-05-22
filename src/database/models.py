@@ -21,7 +21,7 @@ class UserModel(AbstractModel):
     verify: Mapped[bool] = mapped_column()
 
     def to_schema(self):
-        return User(login=self.login, email=self.email, password=None, cash=self.cash)
+        return User(login=self.login, email=self.email, cash=self.cash, verify=self.verify)
 
 
 class RouletteGamesModel(AbstractModel):

@@ -48,8 +48,13 @@ class Database:
         return user
 
     def change_user_cash(self, login, delta):
+        # try:
+            # self.session.begin()
         user = self.get_user(login)
-        # with self.session.begin():
-            # self.session.
-        cash = 0
-        pass
+        user.cash += delta
+        # self.session.commit()
+        return True
+        # except:
+            # return False
+
+

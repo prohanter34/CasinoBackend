@@ -6,7 +6,6 @@ import time
 from datetime import datetime, timedelta
 
 
-
 def obj_to_base64(obj):
     obj_json = json.dumps(obj)
     obj_base64 = base64.b64encode(obj_json.encode())
@@ -17,7 +16,7 @@ def base64_to_json_obj(base_str):
     base_bytes = bytes(base_str, encoding="utf8")
     bytes_str = base64.b64decode(base_bytes)
     string = bytes_str.decode()
-    json_obj = json.load(string)
+    json_obj = json.loads(string)
     return json_obj
 
 
@@ -70,3 +69,6 @@ class JWTToken:
         self.payload = payload
         self.signature = signature
         self.check_signature = check_signature
+
+    def is_valid(self):
+        return self.header["time"] > time.mktime(datetime.now().timetuple()) and self.check_signature == self.signature
