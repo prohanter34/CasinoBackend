@@ -41,4 +41,4 @@ CREATE TABLE rouletteBet (
 
 --test
 
-INSERT INTO users (login, email, password, cash) VALUES ('prohanter', 'fkdsf@gg.f', 'admin', 0);
+INSERT INTO users (login, email, password, cash) VALUES ('prohanter', 'fkdsf@gg.f', 'admin', 1000);
