@@ -1,3 +1,5 @@
+import time
+from time import sleep
 from fastapi import FastAPI, Cookie, Request
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -7,8 +9,11 @@ from typing import Annotated
 from starlette.responses import JSONResponse
 import hashlib
 from src.database.database import Database
-from src.schemas.schemas import User, GoodResponse, BadResponse, VerifyRequest, Deposit, PasswordsChange
+from src.schemas.schemas import User, GoodResponse, BadResponse, VerifyRequest, Deposit, PasswordsChange, RouletteBet, \
+    RouletteResult, RouletteGameState
 from src.utils.utils import generate_verify_code, send_register_email, get_hash
+from datetime import datetime, timedelta
+
 
 app = FastAPI()
 print('start')
@@ -21,6 +26,13 @@ URL = os.getenv("DB_URL")
 database = Database(URL)
 secret = os.getenv("JWT_SECRET")
 JWTfabric = JWTFabric(secret)
+
+
+# todo вынести в конфиг файл
+# config roulette game
+ROULETTE_GAME_DURATION = 15
+ROULETTE_GAME_BET_TIME = 10
+
 
 
 @app.post("/auth/login")
@@ -139,6 +151,88 @@ def deposit(deposit: Deposit, access_token: str = Cookie(None)):
         return BadResponse(5)
 
 
+@app.post("/roulette/bet")
+def bet_roulette(roulette_bet: RouletteBet, access_token: str = Cookie(None)):
+    login = check_token(access_token)
+    if login is not None:
+        current_game = database.get_roulette_game()
+        current_time = datetime.now().time()
+        game_secs = (
+                                current_game.createtime.hour * 60 + current_game.createtime.minute) * 60 + current_game.createtime.second
+        current_secs = (current_time.hour * 60 + current_time.minute) * 60 + current_time.second
+        if current_secs < game_secs:
+            delta = 86_400 - game_secs + current_secs
+        else:
+            delta = current_secs - game_secs
+        if delta > ROULETTE_GAME_DURATION:
+            database.create_roulette_game()
+            current_game = database.get_roulette_game()
+            database.create_roulette_bet(login=login, cash=roulette_bet.cash,
+                                         bet_type=roulette_bet.betType, game_id=current_game.id)
+            return GoodResponse(103)
+        elif delta < ROULETTE_GAME_BET_TIME:
+            database.create_roulette_bet(login=login, cash=roulette_bet.cash,
+                                         bet_type=roulette_bet.betType, game_id=current_game.id)
+            return GoodResponse(103)
+        else:
+            return BadResponse(11)
+    else:
+        return BadResponse(5)
+
+
+@app.get("/roulette/result")
+def roulette_longpoll_result(access_token: str = Cookie(None)):
+    login = check_token(access_token)
+    if login is not None:
+        current_game = database.get_roulette_game()
+        current_time = datetime.now().time()
+        game_secs = (current_game.createtime.hour * 60 + current_game.createtime.minute) * 60 + current_game.createtime.second
+        current_secs = (current_time.hour * 60 + current_time.minute) * 60 + current_time.second
+        if current_secs < game_secs:
+            delta = 86_400 - game_secs + current_secs
+        else:
+            delta = current_secs - game_secs
+        if delta > ROULETTE_GAME_BET_TIME:
+            return RouletteResult(number=current_game.number, resultCode=103)
+        else:
+            sleep(ROULETTE_GAME_BET_TIME - delta)
+            return RouletteResult(number=current_game.number, resultCode=103)
+    else:
+        return BadResponse(5)
+
+
+@app.get("/roulette/ping")
+def ping_roulette_game(access_token: str = Cookie(None)):
+    login = check_token(access_token)
+    if login is not None:
+        user = database.get_user(login)
+
+        current_game = database.get_roulette_game()
+        current_time = datetime.now().time()
+        game_secs = (
+                                current_game.createtime.hour * 60 + current_game.createtime.minute) * 60 + current_game.createtime.second
+        current_secs = (current_time.hour * 60 + current_time.minute) * 60 + current_time.second
+        if current_secs < game_secs:
+            delta = 86_400 - game_secs + current_secs
+        else:
+            delta = current_secs - game_secs
+        if delta < ROULETTE_GAME_BET_TIME:
+            # todo можно отдавать число прошлой игры
+            state = RouletteGameState(cash=user.cash, number=None, stage=0, delta=delta)
+            return state
+        elif ROULETTE_GAME_BET_TIME <= delta <= ROULETTE_GAME_DURATION:
+            state = RouletteGameState(cash=user.cash, number=current_game.number, stage=1, delta=delta)
+            return state
+        else:
+            database.create_roulette_game()
+            current_game = database.get_roulette_game()
+            # todo можно отдавать число прошлой игры
+            state = RouletteGameState(cash=user.cash, number=None, stage=0, delta=0)
+            return state
+    else:
+        return BadResponse(5)
+
+
 def add_cookie(content, refresh, access):
     response = JSONResponse(content=content)
     response.set_cookie(key="access_token", value=access)
@@ -167,6 +261,13 @@ def check_token(token: str):
         return access_token.payload["login"]
     else:
         return None
+
+
+def create_roulette_game():
+    global roulette_game_create_time
+    current_time = time.mktime(datetime.now().timetuple())
+    roulette_game_create_time = current_time
+    database.create_roulette_game()
 
 
 origins = [

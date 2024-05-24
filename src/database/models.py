@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import as_declarative, mapped_column, Mapped
@@ -27,10 +28,11 @@ class UserModel(AbstractModel):
 class RouletteGamesModel(AbstractModel):
     __tablename__ = 'roulettegames'
     number: Mapped[int] = mapped_column()
-    cashOnGreen: Mapped[int] = mapped_column()
-    cashOnBlack: Mapped[int] = mapped_column()
-    cashOnRed: Mapped[int] = mapped_column()
+    cashongreen: Mapped[int] = mapped_column()
+    cashonblack: Mapped[int] = mapped_column()
+    cashonred: Mapped[int] = mapped_column()
     data: Mapped[datetime.datetime] = mapped_column()
+    createtime: Mapped[datetime.time] = mapped_column()
 
 
 @as_declarative()
@@ -39,10 +41,10 @@ class RouletteBetTypeModel:
     type: Mapped[str] = mapped_column(primary_key=True)
 
 
-class RouletteBet(AbstractModel):
+class RouletteBetModel(AbstractModel):
     __tablename__ = 'roulettebet'
     login: Mapped[str] = mapped_column(ForeignKey('users.login'))
     bet: Mapped[int] = mapped_column()
-    betType: Mapped[str] = mapped_column(ForeignKey('roulettebettype.type'))
-    gameId: Mapped[int] = mapped_column()
+    bettype: Mapped[str] = mapped_column(ForeignKey(RouletteBetTypeModel.type), )
+    gameid: Mapped[int] = mapped_column()
 

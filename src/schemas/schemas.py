@@ -52,4 +52,26 @@ class BadResponse(BaseModel):
 # 4 - uncorrected verify code
 # 5 - old refresh token
 # 66 - all bad
+# 11 - need wait
+
+
+# ROULETTE SCHEMAS
+class RouletteBet(BaseModel):
+    betType: str
+    cash: int
+
+
+class RouletteResult(BaseModel):
+    number: int
+    resultCode: int
+
+
+class RouletteGameState(BaseModel):
+    resultCode: int = 103
+    cash: int
+    number: int | None
+    stage: int
+    delta: int
+
+
 

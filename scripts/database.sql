@@ -19,7 +19,8 @@ CREATE TABLE rouletteGames (
     cashOnGreen INTEGER NOT NULL CHECK (cashOnGreen >= 0),
     cashOnRed INTEGER NOT NULL CHECK (cashOnRed >= 0),
     cashOnBlack INTEGER NOT NULL CHECK (cashOnBlack >= 0),
-    data date NOT NULL
+    data date DEFAULT current_date NOT NULL,
+    createTime time DEFAULT current_time NOT NULL
 );
 
 CREATE TABLE rouletteBetType (
