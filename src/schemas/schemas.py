@@ -53,6 +53,7 @@ class BadResponse(BaseModel):
 # 5 - old refresh token
 # 66 - all bad
 # 11 - need wait
+# 10 - no money
 
 
 # ROULETTE SCHEMAS
@@ -72,6 +73,12 @@ class RouletteGameState(BaseModel):
     number: int | None
     stage: int
     delta: int
+
+
+class BetHistory(BaseModel):
+    game: str
+    bet: int
+    gain: int
 
 
 

@@ -166,14 +166,20 @@ def bet_roulette(roulette_bet: RouletteBet, access_token: str = Cookie(None)):
             delta = current_secs - game_secs
         if delta > ROULETTE_GAME_DURATION:
             database.create_roulette_game()
-            current_game = database.get_roulette_game()
-            database.create_roulette_bet(login=login, cash=roulette_bet.cash,
-                                         bet_type=roulette_bet.betType, game_id=current_game.id)
-            return GoodResponse(103)
+            if database.change_user_cash(login=login, delta=-roulette_bet.cash):
+                current_game = database.get_roulette_game()
+                database.create_roulette_bet(login=login, cash=roulette_bet.cash,
+                                             bet_type=roulette_bet.betType, game_id=current_game.id)
+                return GoodResponse(103)
+            else:
+                return BadResponse(10)
         elif delta < ROULETTE_GAME_BET_TIME:
-            database.create_roulette_bet(login=login, cash=roulette_bet.cash,
-                                         bet_type=roulette_bet.betType, game_id=current_game.id)
-            return GoodResponse(103)
+            if database.change_user_cash(login=login, delta=-roulette_bet.cash):
+                database.create_roulette_bet(login=login, cash=roulette_bet.cash,
+                                             bet_type=roulette_bet.betType, game_id=current_game.id)
+                return GoodResponse(103)
+            else:
+                return BadResponse(10)
         else:
             return BadResponse(11)
     else:
@@ -229,6 +235,15 @@ def ping_roulette_game(access_token: str = Cookie(None)):
             # todo можно отдавать число прошлой игры
             state = RouletteGameState(cash=user.cash, number=None, stage=0, delta=0)
             return state
+    else:
+        return BadResponse(5)
+
+
+@app.get("/account/betHistory")
+def bet_history(access_token: str = Cookie(None)):
+    login = check_token(access_token)
+    if login is not None:
+        return {"bets": database.get_bet_history(login), "resultCode": 103}
     else:
         return BadResponse(5)
 
