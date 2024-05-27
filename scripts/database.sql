@@ -19,7 +19,8 @@ CREATE TABLE rouletteGames (
     cashOnGreen INTEGER NOT NULL CHECK (cashOnGreen >= 0),
     cashOnRed INTEGER NOT NULL CHECK (cashOnRed >= 0),
     cashOnBlack INTEGER NOT NULL CHECK (cashOnBlack >= 0),
-    data date NOT NULL
+    data date DEFAULT current_date NOT NULL,
+    createTime time DEFAULT current_time NOT NULL
 );
 
 CREATE TABLE rouletteBetType (
@@ -38,7 +39,19 @@ CREATE TABLE rouletteBet (
     gameId INTEGER NOT NULL REFERENCES rouletteGames(id)
 );
 
+CREATE TABLE promotionalCode (
+    id serial,
+    login VARCHAR(20) REFERENCES users(login),
+    code VARCHAR(20) PRIMARY KEY NOT NULL,
+    coefficient FLOAT NOT NULL CHECK (coefficient >= 1)
+);
+
+
 
 --test
 
+
 INSERT INTO users (login, email, password, cash) VALUES ('prohanter', 'fkdsf@gg.f', 'admin', 1000);
+
+INSERT INTO promotionalCode (login, code, coefficient) VALUES ('prohanter', 'supercode', 1.20);
+
