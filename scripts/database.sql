@@ -50,5 +50,8 @@ CREATE TABLE promotionalCode (
 
 --test
 
-INSERT INTO users (login, email, password, cash) VALUES ('prohanter', 'fkdsf@gg.f', 'admin', 0);
+
+INSERT INTO users (login, email, password, cash) VALUES ('prohanter', 'fkdsf@gg.f', 'admin', 1000);
+
 INSERT INTO promotionalCode (login, code, coefficient) VALUES ('prohanter', 'supercode', 1.20);
+
