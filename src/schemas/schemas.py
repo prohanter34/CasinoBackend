@@ -16,6 +16,7 @@ class PasswordsChange(BaseModel):
 
 class Deposit(BaseModel):
     deposit: int
+    promo: str
 
 
 class VerifyRequest(BaseModel):
@@ -54,6 +55,7 @@ class BadResponse(BaseModel):
 # 66 - all bad
 # 11 - need wait
 # 10 - no money
+# 12 - code does not exist
 
 
 # ROULETTE SCHEMAS
@@ -79,6 +81,10 @@ class BetHistory(BaseModel):
     game: str
     bet: int
     gain: int
+
+
+class CheckPromo(BaseModel):
+    code: str
 
 
 

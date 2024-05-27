@@ -48,3 +48,10 @@ class RouletteBetModel(AbstractModel):
     bettype: Mapped[str] = mapped_column(ForeignKey(RouletteBetTypeModel.type), )
     gameid: Mapped[int] = mapped_column()
 
+
+class PromotionalCodeModel(AbstractModel):
+    __tablename__ = "promotionalcode"
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=False)
+    code: Mapped[str] = mapped_column(primary_key=True)
+    login: Mapped[str] = mapped_column(ForeignKey('users.login'))
+    coefficient: Mapped[float] = mapped_column()

@@ -39,7 +39,16 @@ CREATE TABLE rouletteBet (
     gameId INTEGER NOT NULL REFERENCES rouletteGames(id)
 );
 
+CREATE TABLE promotionalCode (
+    id serial,
+    login VARCHAR(20) REFERENCES users(login),
+    code VARCHAR(20) PRIMARY KEY NOT NULL,
+    coefficient FLOAT NOT NULL CHECK (coefficient >= 1)
+);
+
+
 
 --test
 
 INSERT INTO users (login, email, password, cash) VALUES ('prohanter', 'fkdsf@gg.f', 'admin', 0);
+INSERT INTO promotionalCode (login, code, coefficient) VALUES ('prohanter', 'supercode', 1.20);

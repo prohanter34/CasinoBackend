@@ -3,7 +3,8 @@ from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import registry, Session
 from datetime import date
 from datetime import datetime
-from src.database.models import AbstractModel, UserModel, RouletteGamesModel, RouletteBetModel, RouletteBetTypeModel
+from src.database.models import AbstractModel, UserModel, RouletteGamesModel, RouletteBetModel, RouletteBetTypeModel, \
+    PromotionalCodeModel
 import random
 from time import sleep
 
@@ -112,28 +113,39 @@ class Database:
                 self.change_user_cash(login=bet.login, delta=bet.bet * 35)
 
     def get_bet_history(self, login):
-        # try:
-        res = self.session.execute(select(RouletteBetModel.bet, RouletteBetModel.bettype, RouletteBetModel.gameid, RouletteBetModel.id)
-                                   .where(RouletteBetModel.login == login).order_by(RouletteBetModel.id.desc()).limit(50))
-        bets = list(res.fetchall())
-        # bets.reverse()
-        betHistory = []
-        for bet in bets:
-            res = self.session.execute(select(RouletteGamesModel).where(RouletteGamesModel.id == bet.gameid))
-            game = res.scalar()
-            is_win_x2 = (bet.bettype == "red" and game.number in RED_NUMBERS) or \
-                        (bet.bettype == "black" and game.number in BLACK_NUMBERS)
-            is_win_x35 = bet.bettype == "green" and game.number == 0
-            if is_win_x2:
-                gain = bet.bet
-            elif is_win_x35:
-                gain = bet.bet * 34
-            else:
-                gain = -bet.bet
-            betHistory.append(BetHistory(bet=bet.bet, gain=gain, game="roulette"))
-        self.session.commit()
-        return betHistory
-        # except:
+        try:
+            res = self.session.execute(select(RouletteBetModel.bet, RouletteBetModel.bettype, RouletteBetModel.gameid, RouletteBetModel.id)
+                                       .where(RouletteBetModel.login == login).order_by(RouletteBetModel.id.desc()).limit(50))
+            bets = list(res.fetchall())
+            # bets.reverse()
+            betHistory = []
+            for bet in bets:
+                res = self.session.execute(select(RouletteGamesModel).where(RouletteGamesModel.id == bet.gameid))
+                game = res.scalar()
+                is_win_x2 = (bet.bettype == "red" and game.number in RED_NUMBERS) or \
+                            (bet.bettype == "black" and game.number in BLACK_NUMBERS)
+                is_win_x35 = bet.bettype == "green" and game.number == 0
+                if is_win_x2:
+                    gain = bet.bet
+                elif is_win_x35:
+                    gain = bet.bet * 34
+                else:
+                    gain = -bet.bet
+                betHistory.append(BetHistory(bet=bet.bet, gain=gain, game="roulette"))
+            self.session.commit()
+            return betHistory
+        except:
             # self.session.rollback()
-            # return self.get_bet_history(login)
+            sleep(2)
+            return self.get_bet_history(login)
+
+    def get_promo(self, promo: str):
+        try:
+            res = self.session.execute(select(PromotionalCodeModel).where(PromotionalCodeModel.code == promo))
+            code = res.scalar()
+            return code
+        except:
+            self.session.rollback()
+            sleep(2)
+            return self.get_promo(promo)
 

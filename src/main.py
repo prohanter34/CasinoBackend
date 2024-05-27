@@ -1,3 +1,4 @@
+import math
 import time
 from time import sleep
 from fastapi import FastAPI, Cookie, Request
@@ -10,7 +11,7 @@ from starlette.responses import JSONResponse
 import hashlib
 from src.database.database import Database
 from src.schemas.schemas import User, GoodResponse, BadResponse, VerifyRequest, Deposit, PasswordsChange, RouletteBet, \
-    RouletteResult, RouletteGameState
+    RouletteResult, RouletteGameState, CheckPromo
 from src.utils.utils import generate_verify_code, send_register_email, get_hash
 from datetime import datetime, timedelta
 
@@ -143,12 +144,30 @@ def verify_registration(request: VerifyRequest):
 def deposit(deposit: Deposit, access_token: str = Cookie(None)):
     login = check_token(access_token)
     if login is not None:
-        if database.change_user_cash(login, deposit.deposit):
+        promo = deposit.promo
+        promo = database.get_promo(promo)
+        if promo is not None:
+            coefficient = promo.coefficient
+        else:
+            coefficient = 1
+        if database.change_user_cash(login, math.floor(deposit.deposit * coefficient)):
             return GoodResponse(103)
         else:
             return BadResponse(66)
     else:
         return BadResponse(5)
+
+
+@app.get("/cash/promo/")
+def check_promo(code: str):
+    promoDB = database.get_promo(code)
+    if promoDB is not None:
+        return {
+            "resultCode": 103,
+            "coefficient": promoDB.coefficient
+        }
+    else:
+        return BadResponse(12)
 
 
 @app.post("/roulette/bet")
