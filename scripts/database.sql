@@ -17,11 +17,13 @@ CREATE TABLE rouletteGames (
     id serial PRIMARY KEY,
     number INTEGER NOT NULL,
     cashOnGreen INTEGER NOT NULL CHECK (cashOnGreen >= 0),
-    cashOnRed INTEGER NOT NULL CHECK (cashOnRed >= 0),
+    cashOnGreen INTEGER NOT NULL CHECK (cashOnRed >= 0),
     cashOnBlack INTEGER NOT NULL CHECK (cashOnBlack >= 0),
     data date DEFAULT current_date NOT NULL,
     createTime time DEFAULT current_time NOT NULL
 );
+
+INSERT INTO rouletteGames (number, cashOnGreen, cashOnRed, cashOnBlack, data, createTime) VALUES(0, 0, 0, 0, '27-05-2024', '00:00:00');
 
 CREATE TABLE rouletteBetType (
      type VARCHAR(10) PRIMARY KEY NOT NULL
