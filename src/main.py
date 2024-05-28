@@ -4,7 +4,6 @@ from time import sleep
 from fastapi import FastAPI, Cookie, Request
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from dotenv import load_dotenv
 from src.utils.JWT import JWTFabric
 import uvicorn
 from typing import Annotated
@@ -20,7 +19,6 @@ from datetime import datetime, timedelta
 app = FastAPI()
 print('start')
 
-load_dotenv()
 
 path = 'localhost'
 if 'MY_PATH' in os.environ:

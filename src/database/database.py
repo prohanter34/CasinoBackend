@@ -10,8 +10,8 @@ from time import sleep
 
 from src.schemas.schemas import BetHistory
 
-RED_NUMBERS = [1, 3 ,5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
-BLACK_NUMBERS = [2, 4, 6, 8, 10, 11, 13 ,15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35]
+RED_NUMBERS = [15, 4, 2, 17, 37, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3]
+BLACK_NUMBERS = [32, 19, 21, 25, 34, 6, 13, 11, 8, 10, 24, 33, 20, 31, 22, 29, 28, 35, 26]
 
 class Database:
     def __init__(self, URL):
